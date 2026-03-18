@@ -1,0 +1,58 @@
+project: apcb_ml_insights
+registry: data/registry.db
+provider: local
+online_store:
+  type: redis
+  connection_string: "localhost:6379"
+offline_store:
+  type: file
+
+---
+# feast_schema.yaml
+
+# 1. Entity Definitions
+merchant:
+  name: merchant
+  value_type: STRING
+  description: "Terminal Owner or direct unique Merchant ID from APCB DB"
+
+cardholder:
+  name: cardholder
+  value_type: STRING
+  description: "Masked PAN or strictly hashed PAN"
+
+# 2. Data Sources
+merchant_daily_stats:
+  name: merchant_daily_stats
+  path: "s3://apcb-datalake/merchant_daily_aggregates.parquet"
+  event_timestamp_column: "event_timestamp"
+  
+fraud_streaming_source:
+  name: fraud_streaming_source
+  path: "kafka://broker:9092/transactions"
+  event_timestamp_column: "transaction_time"
+
+# 3. Feature Views
+merchant_health_view:
+  name: merchant_health_view
+  entities: ["merchant"]
+  ttl: 86400s # 1 day validity
+  schema:
+    - name: total_amount_due
+      type: FLOAT
+    - name: txn_count
+      type: INT64
+    - name: dispute_rate
+      type: FLOAT
+    - name: is_bespoke_rate
+      type: FLOAT
+  source: merchant_daily_stats
+
+velocity_view:
+  name: pan_velocity_view
+  entities: ["cardholder"]
+  ttl: 3600s # fast expiry for fraud streaming
+  schema:
+    - name: derived_velocity_60s
+      type: FLOAT
+  source: fraud_streaming_source

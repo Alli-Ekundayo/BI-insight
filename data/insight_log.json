@@ -1,0 +1,15 @@
+[
+    {
+        "type": "CHURN_ALERT",
+        "data": {
+            "prompt": "Notification: Significant Drop in Customer Churn Rate - Positive Trend Detected",
+            "title": "Decrease in Customer Churn Rate",
+            "description": "Our system has flagged a positive trend in customer churn rate.",
+            "data_snapshot": {
+                "Recent Churn Rate Decrease": "-100.0%"
+            },
+            "recommendation": "Continue your current retention strategies."
+        },
+        "timestamp": "2026-03-18T11:10:22.774509"
+    }
+]
